@@ -11,9 +11,7 @@ CREATE TABLE Patient(
     gender VARCHAR(25),
     pronouns VARCHAR(10),
     dob DATE,
-    did INT,
     PRIMARY KEY (pid)
-    FOREIGN KEY (did) REFERENCES Doctor(did)
 );
 
 CREATE TABLE PatientMeasurement(
@@ -50,6 +48,20 @@ CREATE TABLE Medication(
     name VARCHAR(255),
     dosage INT,
     description VARCHAR(255)
-    pid INT,
-    FOREIGN KEY (pid) REFERENCES Patient(pid)
 )
+
+CREATE TABLE PatientDoctor(
+    pid INT,
+    did INT,
+    PRIMARY KEY (pid, did),
+    FOREIGN KEY (pid) REFERENCES Patient(pid),
+    FOREIGN KEY (did) REFERENCES Doctor(did)
+);
+
+CREATE TABLE PatientMedication(
+    pid INT,
+    mid INT,
+    PRIMARY KEY (pid, mid),
+    FOREIGN KEY (pid) REFERENCES Patient(pid),
+    FOREIGN KEY (mid) REFERENCES Medication(mid)
+);
