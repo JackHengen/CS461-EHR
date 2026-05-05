@@ -41,14 +41,29 @@ CREATE TABLE Doctor(
     specialty VARCHAR(255),
     fname VARCHAR(255),
     lname VARCHAR(255)
-)
+    PRIMARY KEY (did)
+);
+
+CREATE TABLE Appointment(
+    pid INT,
+    did INT,
+    appointment_time DATETIME,
+    reason VARCHAR(255),
+
+    PRIMARY KEY (pid, did, appointment_time),
+
+    FOREIGN KEY (pid) REFERENCES Patient(pid),
+    FOREIGN KEY (did) REFERENCES Doctor(did)
+);
+
 
 CREATE TABLE Medication(
     mid INT,
     name VARCHAR(255),
     dosage INT,
     description VARCHAR(255)
-)
+    PRIMARY KEY (mid)
+);
 
 CREATE TABLE PatientDoctor(
     pid INT,
