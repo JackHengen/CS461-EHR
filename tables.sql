@@ -17,10 +17,10 @@ CREATE TABLE Patient(
 CREATE TABLE PatientMeasurement(
     pid INT,
     date_of_measurement DATE,
-    height_in INT,
-    weight_lb INT,
-    bp_sys INT,
-    bp_dia INT,
+    height_in FLOAT,
+    weight_lb FLOAT,
+    bp_sys FLOAT,
+    bp_dia FLOAT,
     FOREIGN KEY (pid) REFERENCES Patient(pid)
 );
 
