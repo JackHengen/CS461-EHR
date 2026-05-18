@@ -7,8 +7,8 @@ CREATE TABLE Patient(
     pid INT,
     fname VARCHAR(100) NOT NULL,
     lname VARCHAR(100) NOT NULL,
-    sex ENUM('MALE','FEMALE'),
-    gender VARCHAR(25),
+    sex ENUM('M','F'),
+    gender ENUM('M','F','N'),
     pronouns VARCHAR(10),
     dob DATE,
     PRIMARY KEY (pid)
@@ -40,7 +40,7 @@ CREATE TABLE Doctor(
     did INT,
     specialty VARCHAR(255),
     fname VARCHAR(255),
-    lname VARCHAR(255)
+    lname VARCHAR(255),
     PRIMARY KEY (did)
 );
 
@@ -49,9 +49,7 @@ CREATE TABLE Appointment(
     did INT,
     appointment_time DATETIME,
     reason VARCHAR(255),
-
     PRIMARY KEY (pid, did, appointment_time),
-
     FOREIGN KEY (pid) REFERENCES Patient(pid),
     FOREIGN KEY (did) REFERENCES Doctor(did)
 );
@@ -60,8 +58,8 @@ CREATE TABLE Appointment(
 CREATE TABLE Medication(
     mid INT,
     name VARCHAR(255),
-    dosage INT,
-    description VARCHAR(255)
+    dosage VARCHAR(255),
+    description VARCHAR(255),
     PRIMARY KEY (mid)
 );
 
