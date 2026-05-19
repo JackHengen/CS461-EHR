@@ -13,17 +13,27 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
+    html = "<h1>Patients</h1>\n"
+    with mysql.connector.connect(user=USER, password=PW, host=HOST,database='CS461_EHR') as cnx:
+        with cnx.cursor() as c:
+            c.execute("SELECT fname, lname FROM Patient")
+            res = c.fetchall()
+            for fname, lname in res:
+                html += "<p>"
     return "<p>Hello, World!</p>"
+
+@app.route("/add-user-form",)
+def add_user():
+    pass
+
+@app.route("/add-user",methods=["POST"]):
+    pass
+
 
 USER = 'cs461ehr'
 HOST = 'localhost'
 PW = 'password'
 
-with mysql.connector.connect(user=USER, password=PW, host=HOST,database='CS461_EHR') as cnx:
-    with cnx.cursor() as c:
-        c.execute("SELECT fname, lname FROM Patient WHERE fname = %s",["Maurice"])
-        res = c.fetchall()
-        print(res)
 
 
 # How to connect to the database:
