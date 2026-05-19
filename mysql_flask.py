@@ -22,13 +22,38 @@ def hello_world():
                 html += "<p>"
     return "<p>Hello, World!</p>"
 
-@app.route("/add-user-form",)
+@app.route("/add-user-form")
+def add_user_form():
+    return """
+    <html>
+        <body>
+            <h2>Login Form</h2>
+            <form method="POST" action="/submit">
+                <input type="text" name="fname" placeholder="First Name">
+                <input type="text" name="lname" placeholder="Last Name">
+                <input type="text" name="sex" placeholder="Sex">
+                <input type="text" name="gender" placeholder="Gender">
+                <input type="text" name="pronouns" placeholder="Pronouns">
+                <input type="text" name="dob" placeholder="Date Of Birth">
+                <button type="submit">Submit</button>
+            </form>
+        </body>
+    </html>
+    """
+
+@app.route("/add-user",methods=["POST"])
 def add_user():
-    pass
+    fname = request.form["fname"]
+    lname = request.form["lname"]
+    sex= request.form["sex"]
+    gender = request.form["gender"]
+    pronouns = request.form["pronouns"]
+    dob = request.form["dob"]
 
-@app.route("/add-user",methods=["POST"]):
-    pass
 
+    with mysql.connector.connect(user=USER, password=PW, host=HOST,database='CS461_EHR') as cnx:
+        with cnx.cursor() as c:
+            c.execute("INSERT INTO patient (fname, lname, sex, gender, pronouns, dob) VALUES (%s, %s, %s, %s, %s, %s)", (fname, lname, sex, gender, pronouns, dob))
 
 USER = 'cs461ehr'
 HOST = 'localhost'
