@@ -19,14 +19,15 @@ def hello_world():
             c.execute("SELECT fname, lname FROM Patient")
             res = c.fetchall()
             for fname, lname in res:
-                html += "<p>"
-    return "<p>Hello, World!</p>"
+                html += f"<p>{fname} {lname}</p>"
+    return html
 
-@app.route("/add-user-form",)
-def add_user():
+@app.route("/add-user-form")
+def add_user_form():
     pass
 
-@app.route("/add-user",methods=["POST"]):
+@app.route("/add-user",methods=["POST"])
+def add_user():
     pass
 
 
