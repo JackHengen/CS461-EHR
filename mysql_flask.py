@@ -6,7 +6,7 @@
 #   pip install flask
 #   pip install mysql-connector-python
 
-from flask import Flask
+from flask import Flask, request
 import mysql.connector
 
 app = Flask(__name__)
@@ -26,13 +26,13 @@ def hello_world():
                 html += f"<p>{fname} {lname}</p>"
     return html
 
-@app.route("/add-user",methods=["POST"])
-def add_user():
+@app.route("/add-user-form")
+def add_user_form():
     return """
     <html>
         <body>
             <h2>Login Form</h2>
-            <form method="POST" action="/submit">
+            <form method="POST" action="/add-user">
                 <input type="text" name="fname" placeholder="First Name">
                 <input type="text" name="lname" placeholder="Last Name">
                 <input type="text" name="sex" placeholder="Sex">
