@@ -1,14 +1,27 @@
-# pip install flask
-# pip install mysql-connector-python
+# references: 
+#   flask quickstart: https://flask.palletsprojects.com/en/stable/quickstart/
+#   mysql python documentation: https://dev.mysql.com/doc/connector-python/en/
+
+# first steps:
+#   pip install flask
+#   pip install mysql-connector-python
 
 from flask import Flask
-import mysql.connector as connector
+import mysql.connector
 
 app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
+
+USER = 'cs461ehr'
+HOST = 'localhost'
+PW = 'password'
+
+with mysql.connector.connect(user=USER, password=PW, host=HOST,database='CS461_EHR'):
+    print("works1")
+print("works2")
 
 # How to connect to the database:
 # import mysql.connector
