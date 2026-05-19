@@ -19,9 +19,12 @@ USER = 'cs461ehr'
 HOST = 'localhost'
 PW = 'password'
 
-with mysql.connector.connect(user=USER, password=PW, host=HOST,database='CS461_EHR'):
-    print("works1")
-print("works2")
+with mysql.connector.connect(user=USER, password=PW, host=HOST,database='CS461_EHR') as cnx:
+    with cnx.cursor() as c:
+        c.execute("SELECT fname, lname FROM Patient WHERE fname = %s",["Maurice"])
+        res = c.fetchall()
+        print(res)
+
 
 # How to connect to the database:
 # import mysql.connector
