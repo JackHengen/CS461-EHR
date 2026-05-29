@@ -5,6 +5,13 @@
 <body style="{{ 'background-color: cornflowerblue;' if user_doctor or doctor_login else 'background-color: peachpuff;' }}">
     <nav>
     <ul>
+        <p>
+        {% if fname %}
+        {{ fname }}
+        {% endif %}
+        {% if lname %}
+        {{ lname }}
+        {% endif %}
         {% if user_doctor %}
         <a href="/appointments-doctor">Appointments</a>
         <a href="/profile">Profile</a>

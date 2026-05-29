@@ -5,42 +5,60 @@ from dotenv import load_dotenv
 import os
 from openai import OpenAI
 import datetime as dt
+import bcrypt
 
 DIRECTORY = "synthea_data"
+
+def generate_password():
+    pw = ""
+    for i in range(random.randrange(8,16)):
+        if random.random() > .5:
+            pw += chr(random.randint(65,90))
+        else:
+            pw += chr(random.randint(97,122))
+    return pw
+
 
 def map_patients(patient_rows):
     i = 0
     patients = dict()
-    for row in patient_rows:
-        dat = {
-            "id":i,
-            "dob":row['BIRTHDATE'],
-            'fname':re.sub(r'\d+$','',row['FIRST']),
-            'lname':re.sub(r'\d+$','',row["LAST"]),
-            'sex':row["GENDER"]
-        }
+    with open("patients.txt", 'w') as f:
+        for row in patient_rows:
+            dat = {
+                "id":i,
+                "dob":row['BIRTHDATE'],
+                'fname':re.sub(r'\d+$','',row['FIRST']),
+                'lname':re.sub(r'\d+$','',row["LAST"]),
+                'sex':row["GENDER"]
+            }
 
-        gend_ran = random.random()
-        if gend_ran < .01:
-            if dat['sex'] == 'F':
-                dat['gender'] = 'M'
+            gend_ran = random.random()
+            if gend_ran < .01:
+                if dat['sex'] == 'F':
+                    dat['gender'] = 'M'
+                else:
+                    dat['gender'] = 'F'
+            elif gend_ran < .05:
+                dat['gender'] = 'N'
             else:
-                dat['gender'] = 'F'
-        elif gend_ran < .05:
-            dat['gender'] = 'N'
-        else:
-            dat['gender'] = dat['sex']
+                dat['gender'] = dat['sex']
 
-        if dat['gender'] == 'N':
-            dat['pronouns'] = 'they/them'
-        elif dat['gender'] == 'F':
-            dat['pronouns'] = 'she/her'
-        elif dat['gender'] == 'M':
-            dat['pronouns'] = 'he/him'
+            if dat['gender'] == 'N':
+                dat['pronouns'] = 'they/them'
+            elif dat['gender'] == 'F':
+                dat['pronouns'] = 'she/her'
+            elif dat['gender'] == 'M':
+                dat['pronouns'] = 'he/him'
 
-        patients[row["Id"]] = dat
+            pw = generate_password()
+            f.write(f"fname:{dat['fname']},lname:{dat['lname']},pw:{pw}\n")
+            dat['pw'] = bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode().replace("'","''")
 
-        i+=1
+            patients[row["Id"]] = dat
+
+            i+=1
+
+
     return patients
 
 def map_docs(doc_rows):
@@ -68,31 +86,40 @@ def map_docs(doc_rows):
             'Infectious Disease',
             'General Surgery'
     ]
-    for row in doc_rows:
-        dat = {
-                "id":i,
-                "fname":re.sub(r'\d+$','',row["FIRST"]),
-                "lname":re.sub(r'\d+$','',row["LAST"])
-        }
-        dat["specialty"] = random.choice(specialties)
-        docs[row['Id']] = dat
-        i+=1
+    with open("docs.txt",'w') as f:
+        for row in doc_rows:
+            dat = {
+                    "id":i,
+                    "fname":re.sub(r'\d+$','',row["FIRST"]),
+                    "lname":re.sub(r'\d+$','',row["LAST"])
+            }
+
+            dat["specialty"] = random.choice(specialties)
+
+            pw = generate_password()
+            f.write(f"fname:{dat['fname']},lname:{dat['lname']},pw:{pw}\n")
+            dat['pw'] = bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode().replace("'","''")
+
+            docs[row['Id']] = dat
+
+            i+=1
+
     return docs
 
 def sqlify_patients(patients):
-    s = f'INSERT INTO Patient VALUES\n'
+    s = 'INSERT INTO Patient VALUES\n'
     parts = []
     for p in patients.values():
-        parts.append(f"\t({p['id']},'{p['fname'].replace("'","''")}','{p['lname'].replace("'","''")}','{p['sex']}','{p['gender']}','{p['pronouns']}','{p['dob']}')")
+        parts.append(f"\t({p['id']},'{p['fname'].replace("'","''")}','{p['lname'].replace("'","''")}','{p['sex']}','{p['gender']}','{p['pronouns']}','{p['dob']}','{p['pw']}')")
     s += ",\n".join(parts)
     s += '\n;'
     return s
 
 def sqlify_docs(docs):
-    s = f'INSERT INTO Doctor VALUES\n'
+    s = 'INSERT INTO Doctor VALUES\n'
     parts = []
     for d in docs.values():
-        parts.append(f"\t({d['id']},'{d['specialty']}','{d['fname']}','{d['lname']}')")
+        parts.append(f"\t({d['id']},'{d['specialty']}','{d['fname']}','{d['lname']}','{d['pw']}')")
     s += ",\n".join(parts)
     s += '\n;'
     return s
@@ -101,7 +128,7 @@ def generate_patient_docs(patients,docs):
     mappings = []
     docs = list(docs.values())
     for patient in patients.values():
-        num_docs = round(random.gauss(1,.5)) 
+        num_docs = round(random.gauss(1,.5))
         if num_docs < 1:
             num_docs = 1
         patient_docs = set()
@@ -140,7 +167,7 @@ def get_medications_data():
     return medications, med_patient_mapping
 
 
-    
+
 def process_medications(med_data):
     load_dotenv()
 
@@ -148,8 +175,8 @@ def process_medications(med_data):
     I have a list of medications in the format code,string that I need to convert to a CSV of code, medication_name,
     dosage, and description by converting the string into the medication_name, dosage, and description
     Something like:
-    12345, Abuse-Deterrent 12 HR  15 MG Extended Release Oral Tablet 
-    -> 
+    12345, Abuse-Deterrent 12 HR  15 MG Extended Release Oral Tablet
+    ->
     12345, Oxycodone Hydrochloride,   15 MG, Abuse-Deterrent 12 HR Extended Release Oral Tablet
 
     DO NOT ADD A HEADER LINE
@@ -160,15 +187,15 @@ def process_medications(med_data):
     """
     for code,med in med_data.items():
         med_prompt += f"{code},{med.replace(",",";")}\n"
-    
+
     # print(med_prompt)
 
     client = OpenAI()
     response = client.responses.create(
         model="gpt-4o-mini",
-        input = med_prompt
+        input=med_prompt
     )
-    
+
     csv = response.output_text
     medications = dict()
     i = 0
@@ -432,7 +459,7 @@ def generate_appointments(patient_docs):
         appointments.append({"pid":p,"did":d,"appointment_time":date,"reason":reason})
 
     return appointments
-        
+
 
 def sqlify_appointments(appointments):
     s = "INSERT INTO Appointment VALUES\n"
@@ -525,6 +552,6 @@ if __name__ == "__main__":
 
     patient_medications = map_patient_medications(patients,medications,med_patient_map)
     print(sqlify_patient_medications(patient_medications))
-    
+
     patient_measurements = map_patient_measurements(patients)
     print(sqlify_patient_measurements(patient_measurements))

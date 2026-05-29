@@ -5,18 +5,19 @@ USE CS461_EHR;
 
 CREATE TABLE Patient(
     pid INT,
-    fname VARCHAR(100) NOT NULL,
-    lname VARCHAR(100) NOT NULL,
+    fname VARCHAR(255) NOT NULL,
+    lname VARCHAR(255) NOT NULL,
     sex ENUM('M','F'),
     gender ENUM('M','F','N'),
     pronouns VARCHAR(10),
-    dob DATE,
+    dob DATE NOT NULL,
+    pw VARCHAR(255) NOT NULL,
     PRIMARY KEY (pid)
 );
 
 CREATE TABLE PatientMeasurement(
     pid INT,
-    date_of_measurement DATE,
+    date_of_measurement DATE NOT NULL,
     height_in FLOAT,
     weight_lb FLOAT,
     bp_sys FLOAT,
@@ -26,28 +27,29 @@ CREATE TABLE PatientMeasurement(
 
 CREATE TABLE PatientEmail(
     pid INT,
-    email_addr VARCHAR(255),
+    email_addr VARCHAR(255) NOT NULL,
     FOREIGN KEY (pid) REFERENCES Patient(pid)
 );
 
 CREATE TABLE PatientPhone(
     pid INT,
-    phone_num VARCHAR(50),
+    phone_num VARCHAR(50) NOT NULL,
     FOREIGN KEY (pid) REFERENCES Patient(pid)
 );
 
 CREATE TABLE Doctor(
     did INT,
     specialty VARCHAR(255),
-    fname VARCHAR(255),
-    lname VARCHAR(255),
+    fname VARCHAR(255) NOT NULL,
+    lname VARCHAR(255) NOT NULL,
+    pw VARCHAR(255) NOT NULL,
     PRIMARY KEY (did)
 );
 
 CREATE TABLE Appointment(
     pid INT,
     did INT,
-    appointment_time DATETIME,
+    appointment_time DATETIME NOT NULL,
     reason VARCHAR(255),
     PRIMARY KEY (pid, did, appointment_time),
     FOREIGN KEY (pid) REFERENCES Patient(pid),
@@ -57,8 +59,8 @@ CREATE TABLE Appointment(
 
 CREATE TABLE Medication(
     mid INT,
-    name VARCHAR(255),
-    dosage VARCHAR(255),
+    name VARCHAR(255) NOT NULL,
+    dosage VARCHAR(255) NOT NULL,
     description VARCHAR(255),
     PRIMARY KEY (mid)
 );

@@ -8,7 +8,8 @@ pip install -r requirements.txt
 To generate new mock database data:
 ```
 echo "OPENAI_API_KEY=<<YOUR OPEN API KEY HERE" > .env
-python data/data_gen_pipeline.py > insertions.sql
+cd data
+python data_gen_pipeline.py > insertions.sql
 ```
 
 To create the database:
@@ -20,5 +21,5 @@ mysql < data/user_setup.sql
 
 To run the flask app:
 ```
-flask --app app.app run
+flask --app app.app run --debug
 ```
