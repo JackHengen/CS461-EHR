@@ -1,9 +1,14 @@
 <!doctype html>
 <head>
     <title>MedLoop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body style="{{ 'background-color: cornflowerblue;' if user_doctor or doctor_login else 'background-color: peachpuff;' }}">
     <section class="content">
+        <a href="/" style="text-align: center; text-decoration:none; color:black;">
+            <h1>MedLoop</h1>
+        </a>
+        <hr style="border: none; height:3px; background-color:silver;">
         {% for message in get_flashed_messages() %}
             <div class="flash">{{ message }}</div>
         {% endfor %}

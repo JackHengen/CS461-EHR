@@ -1,0 +1,36 @@
+a {
+    color: black;
+    text-decoration: none;
+}
+
+.block-top {
+    border: 5px solid black;
+    border-bottom: none;
+}
+
+.block {
+    border-left: 5px solid black;
+    border-right: 5px solid black;
+}
+
+.block-bottom {
+    border: 5px solid black;
+    border-top: none;
+}
+
+.block, .block-top, .block-bottom {
+    padding: 0 2%;
+}
+
+.block:hover, .block-top:hover, .block-bottom:hover {
+    filter: brightness(1.2);
+}
+
+
+.light {
+    background-color: lightgray;
+}
+
+.dark {
+    background-color: silver;
+}

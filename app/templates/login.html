@@ -1,18 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
-{% include 'navbar.html' %}
-<form method="post" action="{{ '/doctor-login' if doctor_login else '/patient-login' }}">
-    <label for="firstname">First Name:</label>
-    <input type="text" id="firstname" name="firstname">
+<div style="position: absolute; top:50%; left:50%; transform: translate(-50%,-50%); width:50vw; height: 50vh;
+    display:flex; flex-direction: column;">
+    <h3>Log in</h3>
+    <form method="post" action="{{ '/doctor-login' if doctor_login else '/patient-login' }}">
+        <label for="firstname">First Name:</label>
+        <input type="text" id="firstname" name="firstname">
 
-    <label for="lastname">Last Name:</label>
-    <input type="text" id="lastname" name="lastname">
+        <label for="lastname">Last Name:</label>
+        <input type="text" id="lastname" name="lastname">
 
-    <label for="password">Password: </label>
-    <input type="password" id="password" name="password">
+        <label for="password">Password: </label>
+        <input type="password" id="password" name="password">
 
-    <button type="submit">Log in</button>
-</form>
-<a href="/patient-login">Patient Login</a>
-<a href="/doctor-login">Doctor Login</a>
+        <button type="submit">Log in</button>
+    </form>
+    <a href="/patient-login">Patient Login</a>
+    <a href="/doctor-login">Doctor Login</a>
 {% endblock content %}
