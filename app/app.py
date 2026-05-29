@@ -68,10 +68,14 @@ def patient_login():
 
 @app.route("/")
 def home():
+    fname = session.get("fname")
+    if not fname:
+        return redirect("/patient-login")
+    lname = session.get("lname")
+
     doctor_status = session.get("user_doctor",False)
     patient_status = session.get("user_patient",False)
-    fname = session.get("fname")
-    lname = session.get("lname")
+
     return render_template("index.html",user_doctor=doctor_status,user_patient=patient_status,fname=fname,lname=lname)
 
 @app.route("/logout")

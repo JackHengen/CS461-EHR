@@ -1,4 +1,57 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>MedLoop</h1>
+    <h1 style='text-align:center'>MedLoop</h1>
+    <hr style="border: none; height:4px; background-color:silver;">
+    <style>
+        a {
+            height: 10%;
+            border: 5px solid black;
+            border-bottom: none;
+            border-top: none;
+            color: black;
+            text-decoration: none;
+            padding: 0 2%;
+        }
+        a:hover{
+            filter: brightness(1.2);
+        }
+        .top {
+            border-top: 5px solid black;
+        }
+        .bottom {
+            border-bottom: 5px solid black;
+        }
+        .light {
+            background-color: lightgray;
+        }
+        .dark {
+            background-color: silver;
+        }
+    </style>
+    <div style="position: absolute; top:50%; left:50%; transform: translate(-50%,-50%); width:50vw; height: 50vh;
+        display:flex; flex-direction: column;">
+        <h3>Welcome back, {{ fname }}</h1>
+        {% if user_doctor %}
+            <a href="/appointments-doctor" class="top light">
+                <p><strong>Appointments:</strong> View past or upcoming appointment information or create new appointments</p>
+            </a>
+            <a href="/prescriptions" class="dark">
+                <p><strong>Prescriptions:</strong> View prescriptions you have filed or file a new prescription for a
+                patient</p>
+            </a>
+            <a href="/logout" class="bottom light">
+                <p><strong>Log Out</strong></p>
+            </a>
+        {% elif user_patient %}
+            <a href="/appointments-patient" class="top light" >
+                <p><strong>Appointments:</strong> View past or upcoming appointment information or create new appointments</p>
+            </a>
+            <a href="/profile" class="dark">
+                <p><strong>Profile:</strong> View information on your chart including </p>
+            </a>
+            <a href="/logout" class="bottom light">
+                <p><strong>Log Out</strong></p>
+            </a>
+        {% endif %}
+    </div>
 {% endblock content %}

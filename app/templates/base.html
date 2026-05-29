@@ -1,36 +1,12 @@
 <!doctype html>
 <head>
-    <title></title>
+    <title>MedLoop</title>
 </head>
 <body style="{{ 'background-color: cornflowerblue;' if user_doctor or doctor_login else 'background-color: peachpuff;' }}">
-    <nav>
-    <ul>
-        <p>
-        {% if fname %}
-        {{ fname }}
-        {% endif %}
-        {% if lname %}
-        {{ lname }}
-        {% endif %}
-        {% if user_doctor %}
-        <a href="/appointments-doctor">Appointments</a>
-        <a href="/profile">Profile</a>
-        <a href="/prescribe">Prescribe Medication</a>
-        <a href="/logout">Log Out</a>
-        {% elif user_patient %}
-            <a href="/appointments-patient">Appointments</a>
-            <a href="/profile">Profile</a>
-            <a href="/logout">Log Out</a>
-        {% else %}
-            <a href="/register">Register</a>
-            <a href="/patient-login">Log In</a>
-        {% endif %}
-    </ul>
-    </nav>
     <section class="content">
-    {% for message in get_flashed_messages() %}
-        <div class="flash">{{ message }}</div>
-    {% endfor %}
-    {% block content %}{% endblock %}
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+        {% block content %}{% endblock %}
     </section>
 </body>

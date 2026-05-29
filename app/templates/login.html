@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+{% include 'navbar.html' %}
 <form method="post" action="{{ '/doctor-login' if doctor_login else '/patient-login' }}">
     <label for="firstname">First Name:</label>
     <input type="text" id="firstname" name="firstname">
