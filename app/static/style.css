@@ -1,3 +1,10 @@
+:root {
+    --doctor-light: cornflowerblue;
+    --doctor-dark: steelblue;
+    --patient-light: peachpuff;
+    --patient-dark: lightsalmon;
+}
+
 a {
     color: black;
     text-decoration: none;

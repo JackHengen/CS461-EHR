@@ -80,5 +80,9 @@ def home():
 
 @app.route("/logout")
 def logout():
-    session.clear()
-    return redirect("/")
+    if session.get("user_doctor"):
+        session.clear()
+        return redirect("/doctor-login")
+    else:
+        session.clear()
+        return redirect("/")
