@@ -2,16 +2,16 @@
 {% block content %}
     <style>
         .block:hover, .block-top:hover, .block-bottom:hover {
-            background-color: var(--{{ 'doctor-light' if user_doctor else 'patient-light' }});
+            background-color: var(--{{ 'doctor-light' if doctor else 'patient-light' }});
         }
         .block, .block-top, .block-bottom {
-            border-color: var(--{{ 'doctor-dark' if user_doctor else 'patient-dark' }});
+            border-color: var(--{{ 'doctor-dark' if doctor else 'patient-dark' }});
         }
     </style>
     <div style="margin: 0 auto; width:50vw;
                 height: 40vh; display:flex; flex-direction: column; justify-content: end;">
         <h3>Welcome back, {{ fname }}</h3>
-        {% if user_doctor %}
+        {% if doctor %}
             <a href="/appointments-doctor" class="block-top light">
                 <p><strong>Appointments:</strong> View past or upcoming appointment information or create new appointments</p>
             </a>
@@ -22,7 +22,7 @@
             <a href="/logout" class="block-bottom light">
                 <p><strong>Log Out</strong></p>
             </a>
-        {% elif user_patient %}
+        {% else %}
             <a href="/appointments-patient" class="block-top light" >
                 <p><strong>Appointments:</strong> View past or upcoming appointment information or create new appointments</p>
             </a>
@@ -36,7 +36,7 @@
     </div>
     <img src="{{
             url_for('static',filename='blue-flower-arrangement-horizontal.png')
-            if user_doctor else
+            if doctor else
             url_for('static',filename='orange-flower-arrangement-horizontal.png')
     }}" style="display:block; margin: 0 auto; width:90vw; object-fit:contain;">
 

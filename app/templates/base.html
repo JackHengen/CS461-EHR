@@ -3,15 +3,12 @@
     <title>MedLoop</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<!-- <body style="{{ 'background-color: cornflowerblue;' if user_doctor or doctor_login else 'background-color:
+<!-- <body style="{{ 'background-color: cornflowerblue;' if doctor else 'background-color:
     peachpuff;' }}"> --!>
     <section class="content">
         <a href="/" style="text-decoration:none; color:black;">
             <h1>MedLoop</h1>
         </a>
-        {% for message in get_flashed_messages() %}
-            <div class="flash">{{ message }}</div>
-        {% endfor %}
         {% block content %}{% endblock %}
     </section>
 </body>

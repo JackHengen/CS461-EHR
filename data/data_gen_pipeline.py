@@ -20,7 +20,7 @@ def generate_password():
 
 
 def map_patients(patient_rows):
-    i = 0
+    i = 1
     patients = dict()
     with open("patients.txt", 'w') as f:
         for row in patient_rows:
@@ -62,7 +62,7 @@ def map_patients(patient_rows):
     return patients
 
 def map_docs(doc_rows):
-    i = 0
+    i = 1
     docs = dict()
     specialties = [
             'Cardiology',
@@ -198,7 +198,7 @@ def process_medications(med_data):
 
     csv = response.output_text
     medications = dict()
-    i = 0
+    i = 1
     for line in csv.split("\n"):
         # print(line)
         try:

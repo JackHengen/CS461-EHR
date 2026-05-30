@@ -5,8 +5,13 @@
     --patient-dark: lightsalmon;
 }
 
+
 a {
     color: black;
+}
+
+.flash {
+    color:red;
 }
 
 .block-top {

@@ -4,11 +4,11 @@ CREATE DATABASE CS461_EHR;
 USE CS461_EHR;
 
 CREATE TABLE Patient(
-    pid INT,
+    pid INT AUTO_INCREMENT,
     fname VARCHAR(255) NOT NULL,
     lname VARCHAR(255) NOT NULL,
     sex ENUM('M','F'),
-    gender ENUM('M','F','N'),
+    gender VARCHAR(255),
     pronouns VARCHAR(10),
     dob DATE NOT NULL,
     pw VARCHAR(255) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE PatientPhone(
 );
 
 CREATE TABLE Doctor(
-    did INT,
+    did INT AUTO_INCREMENT,
     specialty VARCHAR(255),
     fname VARCHAR(255) NOT NULL,
     lname VARCHAR(255) NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE Appointment(
 
 
 CREATE TABLE Medication(
-    mid INT,
+    mid INT AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     dosage VARCHAR(255) NOT NULL,
     description VARCHAR(255),

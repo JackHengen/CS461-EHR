@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+    <head>
+        <title>MedLoop</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body style="margin:0;">
+        <div style="display:flex; width:100vw; height:100vh;">
+            <div style="width:50%; height:100%; overflow:hidden; display:flex; flex-direction:column;
+                background-color: var(--{{'doctor-dark' if doctor else 'patient-dark'}});">
+                <div style="height:25%; display:flex; align-items:center; justify-content:center;">
+                    <h2 style="font-weight: normal;">New Patient Registration</h2>
+                </div>
+                <img src="{{
+                        url_for('static',filename='blue-flower.png')
+                        if doctor else
+                        url_for('static',filename='orange-flower.png')
+                }}" style="height:75%; object-fit:contain;">
+            </div>
+            <div style="width:50%; height:100%; overflow:hidden; display:flex; flex-direction:column;">
+                <div style="padding-top: 20vh; display:flex; flex-direction:column; align-items:center;">
+                    <h1 style="margin-bottom: 0;">MedLoop</h1>
+                </div>
+
+
+                <form method="post" action="/patient-onboard"
+                    style="display: flex; flex-direction:column; align-items:center;">
+                    {% for message in get_flashed_messages() %}
+                        <div class="flash">{{ message }}</div>
+                    {% endfor %}
+                    <div style="margin: 1%;">
+                        <label for="firstname">First Name:</label>
+                        <input type="text" id="firstname" name="firstname">
+                    </div>
+
+                    <div style="margin: 1%;">
+                        <label for="lastname">Last Name:</label>
+                        <input type="text" id="lastname" name="lastname">
+                    </div>
+
+                    <div style="margin: 1%;">
+                        <label for="dateofbirth">Date of Birth:</label>
+                        <input type="date" id="dateofbirth" name="dateofbirth">
+                    </div>
+
+                    <div style="margin: 1%;">
+                        <label for="sex">Sex:</label>
+                        <select type="date" id="sex" name="sex">
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                            <option value="Intersex">Intersex</option>
+                            <option value="null">Prefer not to answer</option>
+                        </select>
+                    </div>
+
+                    <div style="margin: 1%;">
+                        <label for="gender">Gender:</label>
+                        <select type="date" id="gender" name="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option>Other</option>
+                            <option value="null">Prefer not to answer</option>
+                        </select>
+                    </div>
+
+                    <div id="othergenderdiv" style="margin: 1%; display:none;">
+                        <label for="othergender">Specify your gender:</label>
+                        <input type="text" id="othergender" name="othergender">
+                    </div>
+
+                    <div style="margin: 1%;">
+                        <label for="pronouns">Pronouns:</label>
+                        <select id="pronouns" name="pronouns">
+                            <option>He/Him</option>
+                            <option>She/Her</option>
+                            <option>They/Them</option>
+                            <option>Other</option>
+                            <option value="null">Prefer not to answer</option>
+                        </select>
+                    </div>
+
+                    <div id="otherpronounsdiv" style="margin: 1%; display:none;">
+                        <label for="otherpronouns">Specify your pronouns:</label>
+                        <input type="text" id="otherpronouns" name="otherpronouns">
+                    </div>
+
+                    <div style="margin: 1%;">
+                        <label for="password">Password: </label>
+                        <input type="password" id="password" name="password">
+                    </div>
+
+                    <button type="submit">Log in</button>
+                </form>
+                
+                <div style="margin-top: 5%; display:flex; justify-content: center; gap: 2%;">
+                    <span> Go to: </span>
+                        <a href="/patient-login">Patient Login</a>
+                        <a href="/doctor-login">Doctor Login</a>
+                        <a href="/patient-onboard">Patient Onboarding</a>
+                </div>
+            </div>
+        </div>
+        <script>
+            const pronouns = document.getElementById("pronouns")
+            const otherPronouns = document.getElementById("otherpronounsdiv")
+
+            pronouns.addEventListener("change", () => {
+                otherPronouns.style.display = pronouns.value === 'Other' ? 'block' : 'none'
+            })
+
+            const gender = document.getElementById("gender")
+            const otherGender = document.getElementById("othergenderdiv")
+
+            gender.addEventListener("change", () => {
+                otherGender.style.display = gender.value === 'Other' ? 'block' : 'none'
+            })
+        </script>
+    </body>
+</html>

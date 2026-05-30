@@ -1,5 +1,6 @@
-from flask import Flask, request, render_template, session, redirect
+from flask import Flask, request, render_template, session, redirect, flash
 from mysql import connector
+from datetime import datetime
 import bcrypt
 
 app = Flask(__name__)
@@ -18,16 +19,22 @@ def doctor_login():
                 fname = request.form["firstname"]
                 lname = request.form["lastname"]
 
-                c.execute("SELECT pw FROM Doctor WHERE fname = %s AND lname = %s",[fname,lname])
+                try:
+                    c.execute("SELECT pw FROM Doctor WHERE fname = %s AND lname = %s",[fname,lname])
+                except:
+                    flash("Database issue please contact us")
+                    return redirect("/doctor-login")
                 pw = c.fetchone()
                 if not pw:
-                    raise NotImplementedError("incorrect user")
+                    flash("Incorrect user info")
+                    return redirect("/doctor-login")
                 else:
                     pw= pw[0]
                 if not bcrypt.checkpw(request.form["password"].encode(),pw.encode()):
-                    raise NotImplementedError("incorrect pw")
+                    flash("Incorrect password")
+                    return redirect("/patient-login")
 
-                session["user_doctor"] = True
+                session["doctor"] = True
                 session["fname"] = fname
                 session["lname"] = lname
 
@@ -36,7 +43,7 @@ def doctor_login():
     if request.method == "GET":
         if session.get("fname"):
             return redirect("/")
-        return render_template("login.html",doctor_login=True)
+        return render_template("login.html",doctor=True)
 
 @app.route("/patient-login",methods=["GET", "POST"])
 def patient_login():
@@ -46,16 +53,21 @@ def patient_login():
                 fname = request.form["firstname"]
                 lname = request.form["lastname"]
 
-                c.execute("SELECT pw FROM Patient WHERE fname = %s AND lname = %s",[fname,lname])
+                try:
+                    c.execute("SELECT pw FROM Patient WHERE fname = %s AND lname = %s",[fname,lname])
+                except:
+                    flash("Database issue please contact us")
+                    return redirect("/patient-login")
                 pw = c.fetchone()
                 if not pw:
-                    raise NotImplementedError("incorrect user")
+                    flash("Incorrect user info")
+                    return redirect("/patient-login")
                 else:
                     pw= pw[0]
                 if not bcrypt.checkpw(request.form["password"].encode(),pw.encode()):
-                    raise NotImplementedError("incorrect pw")
+                    flash("Incorrect password")
+                    return redirect("/patient-login")
 
-                session["user_patient"] = True
                 session["fname"] = fname
                 session["lname"] = lname
 
@@ -64,7 +76,42 @@ def patient_login():
     if request.method == "GET":
         if session.get("fname"):
             return redirect("/")
-        return render_template("login.html",doctor_login=False)
+        return render_template("login.html",doctor=False)
+
+@app.route("/patient-onboard",methods=["GET", "POST"])
+def patient_onboard():
+    if request.method == "POST":
+        fname = request.form["firstname"]
+        lname = request.form["lastname"]
+        pw = bcrypt.hashpw(request.form["password"].encode(),bcrypt.gensalt()).decode()
+        dob = datetime.strptime(request.form["dateofbirth"], "%Y-%m-%d").date()
+
+        sex = request.form["sex"] if request.form["sex"] != "null" else None
+        gender = request.form["gender"] if request.form["gender"] != "null" else None
+        if gender == "Other":
+            gender = request.form["othergender"]
+        pronouns = request.form["pronouns"] if request.form["pronouns"] != "null" else None
+        if pronouns == "Other":
+            pronouns = request.form["otherpronouns"]
+
+        with connector.connect(user=USER,password=PW, host=HOST, database=DB) as cnx:
+            with cnx.cursor() as c:
+                try:
+                    c.execute("""INSERT INTO Patient(fname,lname,sex,gender,pronouns,dob,pw)
+                                VALUES (%s,%s,%s,%s,%s,%s,%s)""", [fname,lname,sex,gender,pronouns,dob,pw])
+                except Exception as e:
+                    print(e)
+                    flash("Database issue please contact us")
+                    return redirect("/patient-onboard")
+
+            cnx.commit()
+        flash("Successful account creation")
+        return redirect("/patient-login")
+
+    if request.method == "GET": 
+        if session.get("fname"):
+            return redirect("/")
+        return render_template("onboard.html",doctor=False)
 
 @app.route("/")
 def home():
@@ -73,14 +120,13 @@ def home():
         return redirect("/patient-login")
     lname = session.get("lname")
 
-    doctor_status = session.get("user_doctor",False)
-    patient_status = session.get("user_patient",False)
+    doctor = session.get("doctor",False)
 
-    return render_template("index.html",user_doctor=doctor_status,user_patient=patient_status,fname=fname,lname=lname)
+    return render_template("index.html",doctor=doctor,fname=fname,lname=lname)
 
 @app.route("/logout")
 def logout():
-    if session.get("user_doctor"):
+    if session.get("doctor"):
         session.clear()
         return redirect("/doctor-login")
     else:
