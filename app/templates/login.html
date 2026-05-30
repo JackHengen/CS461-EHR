@@ -20,7 +20,7 @@
             <div style="width:50%; height:100%; overflow:hidden; display:flex; flex-direction:column;">
                 <div style="padding-top: 20vh; display:flex; flex-direction:column; align-items:center;">
                     <h1 style="margin-bottom: 0;">MedLoop</h1>
-                    <p>{{ 'doctor login' if doctor_login else 'patient login' }}</p>
+                    <p>{{ 'Doctor Login' if doctor_login else 'Patient Login' }}</p>
                 </div>
 
                 <form method="post" action="{{ '/doctor-login' if doctor_login else '/patient-login' }}"
@@ -44,8 +44,9 @@
                 </form>
                 
                 <div style="margin-top: 5%; display:flex; justify-content: center; gap: 2%;">
-                    <a href="/patient-login">Patient Login</a>
-                    <a href="/doctor-login">Doctor Login</a>
+                    <span> Go to: </span>
+                        <a href="/patient-login">Patient Login</a>
+                        <a href="/doctor-login">Doctor Login</a>
                 </div>
 
             </div>
