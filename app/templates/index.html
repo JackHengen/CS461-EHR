@@ -1,7 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div style="position: absolute; top:50%; left:50%; transform: translate(-50%,-50%); width:50vw; height: 50vh;
-        display:flex; flex-direction: column;">
+    <style>
+        .block:hover, .block-top:hover, .block-bottom:hover {
+            background-color: var(--{{ 'doctor-light' if user_doctor else 'patient-light' }});
+        }
+        .block, .block-top, .block-bottom {
+            border-color: var(--{{ 'doctor-dark' if user_doctor else 'patient-dark' }});
+        }
+    </style>
+    <div style="margin: 0 auto; width:50vw;
+                height: 40vh; display:flex; flex-direction: column; justify-content: end;">
         <h3>Welcome back, {{ fname }}</h3>
         {% if user_doctor %}
             <a href="/appointments-doctor" class="block-top light">
@@ -26,4 +34,10 @@
             </a>
         {% endif %}
     </div>
+    <img src="{{
+            url_for('static',filename='blue-flower-arrangement-horizontal.png')
+            if user_doctor else
+            url_for('static',filename='orange-flower-arrangement-horizontal.png')
+    }}" style="display:block; margin: 0 auto; width:90vw; object-fit:contain;">
+
 {% endblock content %}

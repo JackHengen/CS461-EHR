@@ -11,17 +11,17 @@ a {
 }
 
 .block-top {
-    border: 5px solid black;
+    border: 5px solid; 
     border-bottom: none;
 }
 
 .block {
-    border-left: 5px solid black;
-    border-right: 5px solid black;
+    border-left: 5px solid; 
+    border-right: 5px solid;
 }
 
 .block-bottom {
-    border: 5px solid black;
+    border: 5px solid;
     border-top: none;
 }
 
@@ -32,7 +32,6 @@ a {
 .block:hover, .block-top:hover, .block-bottom:hover {
     filter: brightness(1.2);
 }
-
 
 .light {
     background-color: lightgray;
