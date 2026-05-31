@@ -61,7 +61,6 @@ def add_user():
 
 
 
-
 # How to connect to the database:
 # import mysql.connector
 # cnx = mysql.connector.connect(user='user', password='pw', host='124.12.123.123',database='medicine')

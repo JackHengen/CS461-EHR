@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+    <title>Schedule Appointment</title>
+</head>
+<body>
+
+    <h1>Schedule Appointment</h1>
+
+    {% for message in get_flashed_messages() %}
+        <div>{{ message }}</div>
+    {% endfor %}
+
+    <form method="post" action="/create-appointment">
+        <label for="appointment_date">Appointment Date:</label>
+        <input type="datetime-local" id="appointment_date" name="appointment_date">
+
+        <br><br>
+
+        <label for="reason">Reason:</label>
+        <input type="text" id="reason" name="reason">
+
+        <br><br>
+
+        <button type="submit">Create Appointment</button>
+    </form>
+
+</body>
+</html>

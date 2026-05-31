@@ -132,3 +132,98 @@ def logout():
     else:
         session.clear()
         return redirect("/")
+
+@app.route("/appointments-patient")
+def appointments_patient():
+    fname = session.get("fname")
+    lname = session.get("lname")
+
+    if not fname:
+        return redirect("/patient-login")
+
+    with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
+        with cnx.cursor(dictionary=True) as c:
+
+            c.execute("""
+                SELECT pid FROM Patient
+                WHERE fname = %s AND lname = %s
+            """, [fname, lname])
+
+            result = c.fetchone()
+            if not result:
+                flash("Patient not found")
+                return redirect("/patient-login")
+
+            pid = result["pid"]
+
+            c.execute("""
+                SELECT *
+                FROM Appointment
+                WHERE pid = %s
+            """, [pid])
+
+            appointments = c.fetchall()
+
+
+    return render_template("appointments-patient.html", appointments=appointments)
+
+@app.route("/create-appointment", methods=["GET", "POST"])
+def create_appointment():
+
+    if request.method == "POST":
+        fname = session.get("fname")
+        lname = session.get("lname")
+
+        appointment_time = datetime.strptime(
+            request.form["appointment_date"],
+            "%Y-%m-%dT%H:%M"
+        )
+
+        reason = request.form["reason"]
+
+        with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
+            with cnx.cursor() as c:
+
+                c.execute("""
+                    SELECT pid FROM Patient
+                    WHERE fname = %s AND lname = %s
+                """, [fname, lname])
+
+                result = c.fetchone()
+                if not result:
+                    flash("Patient not found")
+                    return redirect("/patient-login")
+
+                pid = result[0]
+
+                c.execute("""
+                    SELECT did
+                    FROM PatientDoctor
+                    WHERE pid = %s
+                """, [pid])
+
+                doctor = c.fetchone()
+
+                if not doctor:
+                    flash("No doctor assigned to this patient")
+                    return redirect("/appointments-patient")
+
+                print("Hi")
+
+                did = doctor[0]
+
+                c.execute("""
+                    INSERT INTO Appointment(pid, did, appointment_time, reason)
+                    VALUES (%s, %s, %s, %s)
+                """, [pid, did, appointment_time, reason])
+
+
+            cnx.commit()
+
+        flash("Appointment scheduled successfully")
+        return redirect("/appointments-patient")
+
+    if not session.get("fname"):
+        return redirect("/patient-login")
+
+    return render_template("create-appointment.html")

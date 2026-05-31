@@ -1,0 +1,29 @@
+<h1>Appointments</h1>
+
+<div>
+    <h2>Your Appointments</h2>
+
+    {% if appointments %}
+        {% for a in appointments %}
+            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:5px;">
+                <p><strong>Date & Time:</strong> {{ a.appointment_time }}</p>
+                <p><strong>Reason:</strong> {{ a.reason }}</p>
+                <p><strong>Doctor ID:</strong> {{ a.did }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>You currently have no scheduled appointments.</p>
+    {% endif %}
+</div>
+
+<hr>
+
+<div>
+    <h2>Create a New Appointment</h2>
+
+    <a href="/create-appointment">
+        <button type="button">
+            Schedule Appointment
+        </button>
+    </a>
+</div>
