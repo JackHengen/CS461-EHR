@@ -1,0 +1,25 @@
+<h1>MedLoop</h1>
+
+<h2>Your Prescriptions</h2>
+
+{% if prescriptions %}
+<table border="1">
+    <tr>
+        <th>Medication</th>
+        <th>Dosage</th>
+        <th>Description</th>
+    </tr>
+
+    {% for med in prescriptions %}
+    <tr>
+        <td>{{ med.name }}</td>
+        <td>{{ med.dosage }}</td>
+        <td>{{ med.description }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No prescriptions found.</p>
+{% endif %}
+
+<p><a href="/">Back to Home</a></p>

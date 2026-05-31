@@ -8,32 +8,42 @@
             border-color: var(--{{ 'doctor-dark' if doctor else 'patient-dark' }});
         }
     </style>
+
     <div style="margin: 0 auto; width:50vw;
                 height: 40vh; display:flex; flex-direction: column; justify-content: end;">
         <h3>Welcome back, {{ fname }}</h3>
+
         {% if doctor %}
             <a href="/appointments-doctor" class="block-top light">
                 <p><strong>Appointments:</strong> View past or upcoming appointment information or create new appointments</p>
             </a>
+
             <a href="/prescriptions" class="block dark">
-                <p><strong>Prescriptions:</strong> View prescriptions you have filed or file a new prescription for a
-                patient</p>
+                <p><strong>Prescriptions:</strong> View prescriptions you have filed or file a new prescription for a patient</p>
             </a>
+
             <a href="/logout" class="block-bottom light">
                 <p><strong>Log Out</strong></p>
             </a>
         {% else %}
-            <a href="/appointments-patient" class="block-top light" >
+            <a href="/appointments-patient" class="block-top light">
                 <p><strong>Appointments:</strong> View past or upcoming appointment information or create new appointments</p>
             </a>
-            <a href="/profile" class="block dark">
-                <p><strong>Profile:</strong> View information on your chart including </p>
+
+            <a href="/profile" class="block light">
+                <p><strong>Profile:</strong> View information on your chart</p>
             </a>
+
+            <a href="/prescriptions" class="block dark">
+                <p><strong>Prescriptions:</strong> View your current medications and dosage information</p>
+            </a>
+
             <a href="/logout" class="block-bottom light">
                 <p><strong>Log Out</strong></p>
             </a>
         {% endif %}
     </div>
+
     <img src="{{
             url_for('static',filename='blue-flower-arrangement-horizontal.png')
             if doctor else

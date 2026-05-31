@@ -227,3 +227,121 @@ def create_appointment():
         return redirect("/patient-login")
 
     return render_template("create-appointment.html")
+
+@app.route("/prescriptions", methods=["GET", "POST"])
+def prescriptions():
+    print("PRESCRIPTIONS ROUTE HIT")
+    print("fname:", session.get("fname"))
+    print("doctor:", session.get("doctor"))
+    
+    fname = session.get("fname")
+    lname = session.get("lname")
+
+    if not fname:
+        return redirect("/patient-login")
+
+    doctor = session.get("doctor", False)
+
+    with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
+        with cnx.cursor(dictionary=True) as c:
+
+            if doctor:
+                if request.method == "POST":
+                    pid = request.form["pid"]
+                    mid = request.form["mid"]
+
+                    try:
+                        c.execute("""
+                            INSERT INTO PatientMedication(pid, mid)
+                            VALUES (%s, %s)
+                        """, [pid, mid])
+
+                        cnx.commit()
+                        flash("Prescription filed successfully")
+                    except Exception as e:
+                        print(e)
+                        flash("Database issue please contact us")
+
+                    return redirect("/prescriptions")
+
+                c.execute("""
+                    SELECT pid, fname, lname
+                    FROM Patient
+                    ORDER BY lname, fname
+                """)
+                patients = c.fetchall()
+
+                c.execute("""
+                    SELECT mid, name, dosage, description
+                    FROM Medication
+                    ORDER BY name
+                """)
+                medications = c.fetchall()
+
+                
+
+                return render_template(
+                    "prescriptions-doctor.html",
+                    patients=patients,
+                    medications=medications
+                )
+
+            c.execute("""
+                SELECT pid
+                FROM Patient
+                WHERE fname = %s AND lname = %s
+            """, [fname, lname])
+
+            patient = c.fetchone()
+
+            if not patient:
+                flash("Patient not found")
+                return redirect("/patient-login")
+
+            c.execute("""
+                SELECT m.mid, m.name, m.dosage, m.description
+                FROM Medication m
+                JOIN PatientMedication pm ON m.mid = pm.mid
+                WHERE pm.pid = %s
+            """, [patient["pid"]])
+
+            prescriptions = c.fetchall()
+
+    return render_template("prescriptions.html", prescriptions=prescriptions)
+
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+    fname = session.get("fname")
+    lname = session.get("lname")
+
+    if not fname:
+        return redirect("/patient-login")
+
+    with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
+        with cnx.cursor(dictionary=True) as c:
+
+            c.execute("""
+                SELECT pid, fname, lname, email, phone
+                FROM Patient
+                WHERE fname = %s AND lname = %s
+            """, [fname, lname])
+
+            patient = c.fetchone()
+
+            if request.method == "POST":
+                email = request.form["email"]
+                phone = request.form["phone"]
+
+                c.execute("""
+                    UPDATE Patient
+                    SET email = %s,
+                        phone = %s
+                    WHERE pid = %s
+                """, [email, phone, patient["pid"]])
+
+                cnx.commit()
+
+                flash("Profile updated successfully")
+                return redirect("/profile")
+
+    return render_template("profile.html", patient=patient)

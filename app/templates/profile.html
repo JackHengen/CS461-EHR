@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Profile</h2>
+
+{% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+{% endfor %}
+
+<p><strong>Name:</strong> {{ patient.fname }} {{ patient.lname }}</p>
+
+<form method="POST">
+
+    <label>Email:</label>
+    <input
+        type="email"
+        name="email"
+        value="{{ patient.email or '' }}"
+    >
+
+    <br><br>
+
+    <label>Phone Number:</label>
+    <input
+        type="text"
+        name="phone"
+        value="{{ patient.phone or '' }}"
+    >
+
+    <br><br>
+
+    <button type="submit">
+        Update Profile
+    </button>
+
+</form>
+
+<p><a href="/">Back to Home</a></p>
+
+{% endblock content %}
