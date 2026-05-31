@@ -9,6 +9,16 @@
                 <p><strong>Date & Time:</strong> {{ a.appointment_time }}</p>
                 <p><strong>Reason:</strong> {{ a.reason }}</p>
                 <p><strong>Doctor ID:</strong> {{ a.did }}</p>
+
+                <form action="{{ url_for('delete_appointment') }}" method="POST">
+                    <input type="hidden" name="did" value="{{ a.did }}">
+                    <input type="hidden" name="appointment_time" value="{{ a.appointment_time }}">
+
+                    <button type="submit"
+                            onclick="return confirm('Delete this appointment?');">
+                        Delete Appointment
+                    </button>
+                </form>
             </div>
         {% endfor %}
     {% else %}

@@ -203,20 +203,33 @@ def create_appointment():
                 """, [pid])
 
                 doctor = c.fetchone()
-
                 if not doctor:
-                    flash("No doctor assigned to this patient")
+                    did = 1
+                else:
+                    did = doctor[0]
+
+                c.execute("""
+                    SELECT 1 FROM Appointment
+                    WHERE pid = %s AND appointment_time = %s
+                """, [pid, appointment_time])
+
+                if c.fetchone():
+                    flash("You already have an appointment at this time.")
                     return redirect("/appointments-patient")
 
-                print("Hi")
+                c.execute("""
+                    SELECT 1 FROM Appointment
+                    WHERE did = %s AND appointment_time = %s
+                """, [did, appointment_time])
 
-                did = doctor[0]
+                if c.fetchone():
+                    flash("Doctor is not available at this time.")
+                    return redirect("/appointments-patient")
 
                 c.execute("""
                     INSERT INTO Appointment(pid, did, appointment_time, reason)
                     VALUES (%s, %s, %s, %s)
                 """, [pid, did, appointment_time, reason])
-
 
             cnx.commit()
 
@@ -227,3 +240,43 @@ def create_appointment():
         return redirect("/patient-login")
 
     return render_template("create-appointment.html")
+
+@app.route("/delete-appointment", methods=["POST"])
+def delete_appointment():
+    fname = session.get("fname")
+    lname = session.get("lname")
+
+    if not fname:
+        return redirect("/patient-login")
+
+    did = request.form["did"]
+    appointment_time = request.form["appointment_time"]
+
+    with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
+        with cnx.cursor(dictionary=True) as c:
+
+            c.execute("""
+                SELECT pid
+                FROM Patient
+                WHERE fname = %s AND lname = %s
+            """, [fname, lname])
+
+            patient = c.fetchone()
+
+            if not patient:
+                flash("Patient not found")
+                return redirect("/patient-login")
+
+            pid = patient["pid"]
+
+            c.execute("""
+                DELETE FROM Appointment
+                WHERE pid = %s
+                  AND did = %s
+                  AND appointment_time = %s
+            """, [pid, did, appointment_time])
+
+            cnx.commit()
+
+    flash("Appointment deleted.")
+    return redirect("/appointments-patient")
