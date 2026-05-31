@@ -8,10 +8,10 @@
             <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:5px;">
                 <p><strong>Date & Time:</strong> {{ a.appointment_time }}</p>
                 <p><strong>Reason:</strong> {{ a.reason }}</p>
-                <p><strong>Doctor ID:</strong> {{ a.did }}</p>
+                <p><strong>Patient ID:</strong> {{ a.pid }}</p>
 
-                <form action="{{ url_for('delete_appointment') }}" method="POST">
-                    <input type="hidden" name="did" value="{{ a.did }}">
+                <form action="{{ url_for('delete_appointment_doctor') }}" method="POST">
+                    <input type="hidden" name="pid" value="{{ a.pid }}">
                     <input type="hidden" name="appointment_time" value="{{ a.appointment_time }}">
 
                     <button type="submit"
@@ -31,7 +31,7 @@
 <div>
     <h2>Create a New Appointment</h2>
 
-    <a href="/create-appointment">
+    <a href="/create-appointment-doctor">
         <button type="button">
             Schedule Appointment
         </button>
