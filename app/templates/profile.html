@@ -9,30 +9,62 @@
 
 <p><strong>Name:</strong> {{ patient.fname }} {{ patient.lname }}</p>
 
+<h3>Emails on File</h3>
+
+{% if emails %}
+    <ul>
+        {% for email in emails %}
+            <li>
+                {{ email.email_addr }}
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="action" value="delete_email">
+                    <input type="hidden" name="email_addr" value="{{ email.email_addr }}">
+                    <button type="submit">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No emails on file.</p>
+{% endif %}
+
 <form method="POST">
+    <input type="hidden" name="action" value="add_email">
 
-    <label>Email:</label>
-    <input
-        type="email"
-        name="email"
-        value="{{ patient.email or '' }}"
-    >
+    <label>Add Email:</label>
+    <input type="email" name="email_addr" required>
 
-    <br><br>
+    <button type="submit">Add Email</button>
+</form>
 
-    <label>Phone Number:</label>
-    <input
-        type="text"
-        name="phone"
-        value="{{ patient.phone or '' }}"
-    >
+<hr>
 
-    <br><br>
+<h3>Phone Numbers on File</h3>
 
-    <button type="submit">
-        Update Profile
-    </button>
+{% if phones %}
+    <ul>
+        {% for phone in phones %}
+            <li>
+                {{ phone.phone_num }}
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="action" value="delete_phone">
+                    <input type="hidden" name="phone_num" value="{{ phone.phone_num }}">
+                    <button type="submit">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No phone numbers on file.</p>
+{% endif %}
 
+<form method="POST">
+    <input type="hidden" name="action" value="add_phone">
+
+    <label>Add Phone Number:</label>
+    <input type="text" name="phone_num" required>
+
+    <button type="submit">Add Phone</button>
 </form>
 
 <p><a href="/">Back to Home</a></p>

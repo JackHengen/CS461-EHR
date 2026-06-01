@@ -334,30 +334,91 @@ def profile():
         with cnx.cursor(dictionary=True) as c:
 
             c.execute("""
-                SELECT pid, fname, lname, email, phone
+                SELECT pid, fname, lname
                 FROM Patient
                 WHERE fname = %s AND lname = %s
             """, [fname, lname])
 
             patient = c.fetchone()
 
+            if not patient:
+                flash("Patient not found")
+                return redirect("/patient-login")
+
+            pid = patient["pid"]
+
             if request.method == "POST":
-                email = request.form["email"]
-                phone = request.form["phone"]
 
-                c.execute("""
-                    UPDATE Patient
-                    SET email = %s,
-                        phone = %s
-                    WHERE pid = %s
-                """, [email, phone, patient["pid"]])
+                action = request.form.get("action")
 
-                cnx.commit()
+                try:
+                    if action == "add_email":
+                        email = request.form["email_addr"]
 
-                flash("Profile updated successfully")
+                        c.execute("""
+                            INSERT INTO PatientEmail(pid, email_addr)
+                            VALUES (%s, %s)
+                        """, [pid, email])
+
+                    elif action == "delete_email":
+                        email = request.form["email_addr"]
+
+                        c.execute("""
+                            DELETE FROM PatientEmail
+                            WHERE pid = %s
+                              AND email_addr = %s
+                        """, [pid, email])
+
+                    elif action == "add_phone":
+                        phone = request.form["phone_num"]
+
+                        c.execute("""
+                            INSERT INTO PatientPhone(pid, phone_num)
+                            VALUES (%s, %s)
+                        """, [pid, phone])
+
+                    elif action == "delete_phone":
+                        phone = request.form["phone_num"]
+
+                        c.execute("""
+                            DELETE FROM PatientPhone
+                            WHERE pid = %s
+                              AND phone_num = %s
+                        """, [pid, phone])
+
+                    cnx.commit()
+                    flash("Profile updated successfully")
+
+                except Exception as e:
+                    print(e)
+                    flash("Database issue please contact us")
+
                 return redirect("/profile")
 
-    return render_template("profile.html", patient=patient)
+            c.execute("""
+                SELECT email_addr
+                FROM PatientEmail
+                WHERE pid = %s
+                ORDER BY email_addr
+            """, [pid])
+
+            emails = c.fetchall()
+
+            c.execute("""
+                SELECT phone_num
+                FROM PatientPhone
+                WHERE pid = %s
+                ORDER BY phone_num
+            """, [pid])
+
+            phones = c.fetchall()
+
+    return render_template(
+        "profile.html",
+        patient=patient,
+        emails=emails,
+        phones=phones
+    )
 
 @app.route("/delete-appointment", methods=["POST"])
 def delete_appointment():

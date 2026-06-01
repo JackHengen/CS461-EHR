@@ -11,8 +11,6 @@ CREATE TABLE Patient(
     gender VARCHAR(255),
     pronouns VARCHAR(10),
     dob DATE NOT NULL,
-    email VARCHAR(255),
-    phone VARCHAR(20),
     pw VARCHAR(255) NOT NULL,
     PRIMARY KEY (pid)
 );
