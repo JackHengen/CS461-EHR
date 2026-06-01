@@ -3,6 +3,16 @@
 <div>
     <h2>Your Appointments</h2>
 
+    <style>
+        .flash {
+            color: red;
+        }
+    </style>
+
+    {% for message in get_flashed_messages() %}
+        <div class="flash">{{ message }}</div>
+    {% endfor %}
+
     {% if appointments %}
         {% for a in appointments %}
             <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:5px;">

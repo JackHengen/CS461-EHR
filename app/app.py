@@ -174,10 +174,15 @@ def create_appointment():
         fname = session.get("fname")
         lname = session.get("lname")
 
-        appointment_time = datetime.strptime(
-            request.form["appointment_date"],
-            "%Y-%m-%dT%H:%M"
-        )
+        try:
+            appointment_time = datetime.strptime(
+                request.form["appointment_date"],
+                "%Y-%m-%dT%H:%M"
+            )
+        except Exception as e:
+                    print(e)
+                    flash("Please input required fields")
+                    return redirect("/appointments-patient")
 
         reason = request.form["reason"]
 
@@ -226,10 +231,15 @@ def create_appointment():
                     flash("Doctor is not available at this time.")
                     return redirect("/appointments-patient")
 
-                c.execute("""
-                    INSERT INTO Appointment(pid, did, appointment_time, reason)
-                    VALUES (%s, %s, %s, %s)
-                """, [pid, did, appointment_time, reason])
+                try:
+                    c.execute("""
+                        INSERT INTO Appointment(pid, did, appointment_time, reason)
+                        VALUES (%s, %s, %s, %s)
+                    """, [pid, did, appointment_time, reason])
+                except Exception as e:
+                    print(e)
+                    flash("Please input required fields")
+                    return redirect("/appointments-patient")
 
             cnx.commit()
 
@@ -503,10 +513,15 @@ def create_appointment_doctor():
 
         pid = request.form["pid"]
 
-        appointment_time = datetime.strptime(
-            request.form["appointment_date"],
-            "%Y-%m-%dT%H:%M"
-        )
+        try:
+            appointment_time = datetime.strptime(
+                request.form["appointment_date"],
+                "%Y-%m-%dT%H:%M"
+            )
+        except Exception as e:
+                    print(e)
+                    flash("Please input required fields")
+                    return redirect("/appointments-doctor")
 
         reason = request.form["reason"]
 
@@ -524,11 +539,15 @@ def create_appointment_doctor():
                     return redirect("/doctor-login")
 
                 did = result[0]
-                
-                c.execute("""
-                    SELECT 1 FROM Appointment
-                    WHERE did = %s AND appointment_time = %s
-                """, [did, appointment_time])
+                try:
+                    c.execute("""
+                        SELECT 1 FROM Appointment
+                        WHERE did = %s AND appointment_time = %s
+                    """, [did, appointment_time])
+                except Exception as e:
+                    print(e)
+                    flash("Please input required fields")
+                    return redirect("/appointments-doctor")
 
                 if c.fetchone():
                     flash("You already have an appointment at this time.")
@@ -543,10 +562,15 @@ def create_appointment_doctor():
                     flash("Patient is not available at this time.")
                     return redirect("/appointments-doctor")
 
-                c.execute("""
-                    INSERT INTO Appointment(pid, did, appointment_time, reason)
-                    VALUES (%s, %s, %s, %s)
-                """, [pid, did, appointment_time, reason])
+                try:
+                    c.execute("""
+                        INSERT INTO Appointment(pid, did, appointment_time, reason)
+                        VALUES (%s, %s, %s, %s)
+                    """, [pid, did, appointment_time, reason])
+                except Exception as e:
+                    print(e)
+                    flash("Please input required fields")
+                    return redirect("/appointments-doctor")
 
             cnx.commit()
 
