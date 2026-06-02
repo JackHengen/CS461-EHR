@@ -11,72 +11,57 @@ HOST = 'localhost'
 PW = 'password'
 DB = 'CS461_EHR'
 
-@app.route("/doctor-login",methods=["GET", "POST"])
-def doctor_login():
+def login(doctor:bool):
     if request.method == "POST":
         with connector.connect(user=USER,password=PW, host=HOST, database=DB) as cnx:
             with cnx.cursor() as c:
                 fname = request.form["firstname"]
                 lname = request.form["lastname"]
 
+                if doctor:
+                    r = "/doctor-login"
+                else:
+                    r = "/patient-login"
+
                 try:
-                    c.execute("SELECT pw FROM Doctor WHERE fname = %s AND lname = %s",[fname,lname])
+                    if doctor:
+                            c.execute("SELECT pw FROM Doctor WHERE fname = %s AND lname = %s",[fname,lname])
+                    else:
+                        c.execute("SELECT pw FROM Patient WHERE fname = %s AND lname = %s",[fname,lname])
                 except:
                     flash("Database issue please contact us")
-                    return redirect("/doctor-login")
+                    return redirect(r)
+
                 pw = c.fetchone()
                 if not pw:
                     flash("Incorrect user info")
-                    return redirect("/doctor-login")
+                    return redirect(r)
                 else:
                     pw= pw[0]
                 if not bcrypt.checkpw(request.form["password"].encode(),pw.encode()):
                     flash("Incorrect password")
-                    return redirect("/patient-login")
+                    return redirect(r)
 
-                session["doctor"] = True
+                if doctor:
+                    session["doctor"] = True
                 session["fname"] = fname
                 session["lname"] = lname
 
                 return redirect("/")
+    else:
+        if request.method == "GET":
+            if session.get("fname"):
+                return redirect("/")
+            return render_template("login.html",doctor=doctor)
 
-    if request.method == "GET":
-        if session.get("fname"):
-            return redirect("/")
-        return render_template("login.html",doctor=True)
+
+@app.route("/doctor-login",methods=["GET", "POST"])
+def doctor_login():
+    return login(True)
 
 @app.route("/patient-login",methods=["GET", "POST"])
 def patient_login():
-    if request.method == "POST":
-        with connector.connect(user=USER,password=PW, host=HOST, database=DB) as cnx:
-            with cnx.cursor() as c:
-                fname = request.form["firstname"]
-                lname = request.form["lastname"]
-
-                try:
-                    c.execute("SELECT pw FROM Patient WHERE fname = %s AND lname = %s",[fname,lname])
-                except:
-                    flash("Database issue please contact us")
-                    return redirect("/patient-login")
-                pw = c.fetchone()
-                if not pw:
-                    flash("Incorrect user info")
-                    return redirect("/patient-login")
-                else:
-                    pw= pw[0]
-                if not bcrypt.checkpw(request.form["password"].encode(),pw.encode()):
-                    flash("Incorrect password")
-                    return redirect("/patient-login")
-
-                session["fname"] = fname
-                session["lname"] = lname
-
-                return redirect("/")
-
-    if request.method == "GET":
-        if session.get("fname"):
-            return redirect("/")
-        return render_template("login.html",doctor=False)
+    return login(False)
 
 @app.route("/patient-onboard",methods=["GET", "POST"])
 def patient_onboard():
@@ -133,42 +118,12 @@ def logout():
         session.clear()
         return redirect("/")
 
-@app.route("/appointments-patient")
-def appointments_patient():
-    fname = session.get("fname")
-    lname = session.get("lname")
-
-    if not fname:
-        return redirect("/patient-login")
-
-    with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
-        with cnx.cursor(dictionary=True) as c:
-
-            c.execute("""
-                SELECT pid FROM Patient
-                WHERE fname = %s AND lname = %s
-            """, [fname, lname])
-
-            result = c.fetchone()
-            if not result:
-                flash("Patient not found")
-                return redirect("/patient-login")
-
-            pid = result["pid"]
-
-            c.execute("""
-                SELECT *
-                FROM Appointment
-                WHERE pid = %s
-            """, [pid])
-
-            appointments = c.fetchall()
-
-
-    return render_template("appointments-patient.html", appointments=appointments)
-
 @app.route("/create-appointment", methods=["GET", "POST"])
 def create_appointment():
+    is_doctor = session.get("doctor", False)
+
+    if not session.get("fname"):
+        return redirect("/doctor-login" if is_doctor else "/patient-login")
 
     if request.method == "POST":
         fname = session.get("fname")
@@ -180,56 +135,55 @@ def create_appointment():
                 "%Y-%m-%dT%H:%M"
             )
         except Exception as e:
-                    print(e)
-                    flash("Please input required fields")
-                    return redirect("/appointments-patient")
+            print(e)
+            flash("Please input required fields")
+            return redirect("/create-appointment")
 
         reason = request.form["reason"]
 
         with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
             with cnx.cursor() as c:
 
-                c.execute("""
-                    SELECT pid FROM Patient
-                    WHERE fname = %s AND lname = %s
-                """, [fname, lname])
+                if is_doctor:
+                    c.execute("SELECT did FROM Doctor WHERE fname = %s AND lname = %s", [fname, lname])
+                    result = c.fetchone()
+                    if not result:
+                        flash("Doctor not found")
+                        return redirect("/doctor-login")
+                    did = result[0]
+                    pid = request.form["pid"]
 
-                result = c.fetchone()
-                if not result:
-                    flash("Patient not found")
-                    return redirect("/patient-login")
+                    c.execute("SELECT 1 FROM Appointment WHERE did = %s AND appointment_time = %s", [did, appointment_time])
+                    if c.fetchone():
+                        flash("You already have an appointment at this time.")
+                        return redirect("/create-appointment")
 
-                pid = result[0]
+                    c.execute("SELECT 1 FROM Appointment WHERE pid = %s AND appointment_time = %s", [pid, appointment_time])
+                    if c.fetchone():
+                        flash("Patient is not available at this time.")
+                        return redirect("/create-appointment")
 
-                c.execute("""
-                    SELECT did
-                    FROM PatientDoctor
-                    WHERE pid = %s
-                """, [pid])
-
-                doctor = c.fetchone()
-                if not doctor:
-                    did = 1
                 else:
-                    did = doctor[0]
+                    c.execute("SELECT pid FROM Patient WHERE fname = %s AND lname = %s", [fname, lname])
+                    result = c.fetchone()
+                    if not result:
+                        flash("Patient not found")
+                        return redirect("/patient-login")
+                    pid = result[0]
 
-                c.execute("""
-                    SELECT 1 FROM Appointment
-                    WHERE pid = %s AND appointment_time = %s
-                """, [pid, appointment_time])
+                    c.execute("SELECT did FROM PatientDoctor WHERE pid = %s", [pid])
+                    doctor = c.fetchone()
+                    did = doctor[0] if doctor else 1
 
-                if c.fetchone():
-                    flash("You already have an appointment at this time.")
-                    return redirect("/appointments-patient")
+                    c.execute("SELECT 1 FROM Appointment WHERE pid = %s AND appointment_time = %s", [pid, appointment_time])
+                    if c.fetchone():
+                        flash("You already have an appointment at this time.")
+                        return redirect("/create-appointment")
 
-                c.execute("""
-                    SELECT 1 FROM Appointment
-                    WHERE did = %s AND appointment_time = %s
-                """, [did, appointment_time])
-
-                if c.fetchone():
-                    flash("Doctor is not available at this time.")
-                    return redirect("/appointments-patient")
+                    c.execute("SELECT 1 FROM Appointment WHERE did = %s AND appointment_time = %s", [did, appointment_time])
+                    if c.fetchone():
+                        flash("Doctor is not available at this time.")
+                        return redirect("/create-appointment")
 
                 try:
                     c.execute("""
@@ -239,54 +193,45 @@ def create_appointment():
                 except Exception as e:
                     print(e)
                     flash("Please input required fields")
-                    return redirect("/appointments-patient")
+                    return redirect("/create-appointment")
 
             cnx.commit()
 
         flash("Appointment scheduled successfully")
-        return redirect("/appointments-patient")
+        return redirect("/appointments")
 
-    if not session.get("fname"):
-        return redirect("/patient-login")
+    return render_template("create-appointment.html", doctor=is_doctor)
 
-    return render_template("create-appointment.html")
-
-@app.route("/prescriptions", methods=["GET", "POST"])
-def prescriptions():
-    print("PRESCRIPTIONS ROUTE HIT")
-    print("fname:", session.get("fname"))
-    print("doctor:", session.get("doctor"))
-    
+@app.route("/file-prescriptions",methods=["GET","POST"])
+def file_prescriptions():
     fname = session.get("fname")
     lname = session.get("lname")
-
-    if not fname:
-        return redirect("/patient-login")
-
     doctor = session.get("doctor", False)
+
+    if not fname or not lname or not doctor:
+        return redirect("/")
 
     with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
         with cnx.cursor(dictionary=True) as c:
+            if request.method == "POST":
+                pid = request.form["pid"]
+                mid = request.form["mid"]
 
-            if doctor:
-                if request.method == "POST":
-                    pid = request.form["pid"]
-                    mid = request.form["mid"]
+                try:
+                    c.execute("""
+                        INSERT INTO PatientMedication(pid, mid)
+                        VALUES (%s, %s)
+                    """, [pid, mid])
 
-                    try:
-                        c.execute("""
-                            INSERT INTO PatientMedication(pid, mid)
-                            VALUES (%s, %s)
-                        """, [pid, mid])
+                    cnx.commit()
+                    flash("Prescription filed successfully")
+                except Exception as e:
+                    print(e)
+                    flash("Database issue please contact us")
 
-                        cnx.commit()
-                        flash("Prescription filed successfully")
-                    except Exception as e:
-                        print(e)
-                        flash("Database issue please contact us")
+                return redirect("/prescriptions")
 
-                    return redirect("/prescriptions")
-
+            else:
                 c.execute("""
                     SELECT pid, fname, lname
                     FROM Patient
@@ -301,14 +246,26 @@ def prescriptions():
                 """)
                 medications = c.fetchall()
 
-                
-
                 return render_template(
-                    "prescriptions-doctor.html",
+                    "file-prescriptions.html",
                     patients=patients,
-                    medications=medications
+                    medications=medications,
+                    doctor=doctor
                 )
 
+
+@app.route("/prescriptions", methods=["GET", "POST"])
+def prescriptions():
+    fname = session.get("fname")
+    lname = session.get("lname")
+    doctor = session.get("doctor", False)
+
+    if not fname or not fname or doctor:
+        return redirect("/")
+
+
+    with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
+        with cnx.cursor(dictionary=True) as c:
             c.execute("""
                 SELECT pid
                 FROM Patient
@@ -330,7 +287,7 @@ def prescriptions():
 
             prescriptions = c.fetchall()
 
-    return render_template("prescriptions.html", prescriptions=prescriptions)
+    return render_template("prescriptions.html", doctor=doctor, prescriptions=prescriptions)
 
 @app.route("/profile", methods=["GET", "POST"])
 def profile():
@@ -425,203 +382,78 @@ def profile():
 
     return render_template(
         "profile.html",
+        doctor=False,
         patient=patient,
         emails=emails,
         phones=phones
     )
 
-@app.route("/delete-appointment", methods=["POST"])
-def delete_appointment():
-    fname = session.get("fname")
-    lname = session.get("lname")
-
-    if not fname:
-        return redirect("/patient-login")
-
-    did = request.form["did"]
-    appointment_time = request.form["appointment_time"]
-
-    with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
-        with cnx.cursor(dictionary=True) as c:
-
-            c.execute("""
-                SELECT pid
-                FROM Patient
-                WHERE fname = %s AND lname = %s
-            """, [fname, lname])
-
-            patient = c.fetchone()
-
-            if not patient:
-                flash("Patient not found")
-                return redirect("/patient-login")
-
-            pid = patient["pid"]
-
-            c.execute("""
-                DELETE FROM Appointment
-                WHERE pid = %s
-                  AND did = %s
-                  AND appointment_time = %s
-            """, [pid, did, appointment_time])
-
-            cnx.commit()
-
-    flash("Appointment deleted.")
-    return redirect("/appointments-patient")
-
-@app.route("/appointments-doctor")
+@app.route("/appointments")
 def appointments_doctor():
     fname = session.get("fname")
     lname = session.get("lname")
 
+    doctor = session.get("doctor",False)
+
     if not fname:
-        return redirect("/doctor-login")
+        return redirect("/")
 
     with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
         with cnx.cursor(dictionary=True) as c:
-
-            c.execute("""
-                SELECT did FROM Doctor
-                WHERE fname = %s AND lname = %s
-            """, [fname, lname])
-
-            result = c.fetchone()
-            if not result:
-                flash("Patient not found")
-                return redirect("/patient-login")
-
-            did = result["did"]
-
-            c.execute("""
-                SELECT *
-                FROM Appointment
-                WHERE did = %s
-            """, [did])
-
-            appointments = c.fetchall()
-
-
-    return render_template("appointments-doctor.html", appointments=appointments)
-
-@app.route("/create-appointment-doctor", methods=["GET", "POST"])
-def create_appointment_doctor():
-
-    if request.method == "POST":
-        fname = session.get("fname")
-        lname = session.get("lname")
-
-        pid = request.form["pid"]
-
-        try:
-            appointment_time = datetime.strptime(
-                request.form["appointment_date"],
-                "%Y-%m-%dT%H:%M"
-            )
-        except Exception as e:
-                    print(e)
-                    flash("Please input required fields")
-                    return redirect("/appointments-doctor")
-
-        reason = request.form["reason"]
-
-        with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
-            with cnx.cursor() as c:
-
+            if doctor:
                 c.execute("""
-                    SELECT did FROM Doctor
+                    SELECT did as uid FROM Doctor
+                    WHERE fname = %s AND lname = %s
+                """, [fname, lname])
+            else:
+                c.execute("""
+                    SELECT pid as uid FROM Patient
                     WHERE fname = %s AND lname = %s
                 """, [fname, lname])
 
-                result = c.fetchone()
-                if not result:
-                    flash("Doctor not found")
-                    return redirect("/doctor-login")
+            result = c.fetchone()
 
-                did = result[0]
-                try:
-                    c.execute("""
-                        SELECT 1 FROM Appointment
-                        WHERE did = %s AND appointment_time = %s
-                    """, [did, appointment_time])
-                except Exception as e:
-                    print(e)
-                    flash("Please input required fields")
-                    return redirect("/appointments-doctor")
+            if not result:
+                flash("Your account could not be found in the system")
+                return redirect("/")
 
-                if c.fetchone():
-                    flash("You already have an appointment at this time.")
-                    return redirect("/appointments-doctor")
+            uid = result["uid"]
 
-                c.execute("""
-                    SELECT 1 FROM Appointment
-                    WHERE pid = %s AND appointment_time = %s
-                """, [pid, appointment_time])
+            field = "did" if doctor else "pid"
+            c.execute(f"""
+                SELECT *
+                FROM Appointment
+                WHERE {field} = %s
+            """, [uid])
 
-                if c.fetchone():
-                    flash("Patient is not available at this time.")
-                    return redirect("/appointments-doctor")
+            appointments = c.fetchall()
 
-                try:
-                    c.execute("""
-                        INSERT INTO Appointment(pid, did, appointment_time, reason)
-                        VALUES (%s, %s, %s, %s)
-                    """, [pid, did, appointment_time, reason])
-                except Exception as e:
-                    print(e)
-                    flash("Please input required fields")
-                    return redirect("/appointments-doctor")
+    return render_template("appointments.html", doctor=doctor, appointments=appointments)
 
-            cnx.commit()
-
-        flash("Appointment scheduled successfully")
-        return redirect("/appointments-doctor")
-
-    if not session.get("fname"):
-        return redirect("/doctor-login")
-
-    return render_template("create-appointment-doctor.html")
-
-@app.route("/delete-appointment-doctor", methods=["POST"])
-def delete_appointment_doctor():
+@app.route("/delete-appointment", methods=["POST"])
+def delete_appointment():
     fname = session.get("fname")
     lname = session.get("lname")
+    is_doctor = session.get("doctor", False)
 
     if not fname:
-        return redirect("/doctor-login")
+        return redirect("/doctor-login" if is_doctor else "/patient-login")
 
     pid = request.form.get("pid")
+    did = request.form.get("did")
     appointment_time = request.form.get("appointment_time")
 
-    if not pid or not appointment_time:
+    if not pid or not did or not appointment_time:
         flash("Missing appointment data")
-        return redirect("/appointments-doctor")
+        return redirect("/appointments")
 
     with connector.connect(user=USER, password=PW, host=HOST, database=DB) as cnx:
-        with cnx.cursor(dictionary=True) as c:
-
-            c.execute("""
-                SELECT did
-                FROM Doctor
-                WHERE fname = %s AND lname = %s
-            """, [fname, lname])
-
-            doctor = c.fetchone()
-
-            if not doctor:
-                flash("Doctor not found")
-                return redirect("/doctor-login")
-
-            did = doctor["did"]
-
+        with cnx.cursor() as c:
             c.execute("""
                 DELETE FROM Appointment
-                WHERE pid = %s
-                  AND did = %s
-                  AND appointment_time = %s
+                WHERE pid = %s AND did = %s AND appointment_time = %s
             """, [pid, did, appointment_time])
-
             cnx.commit()
 
     flash("Appointment deleted.")
-    return redirect("/appointments-doctor")
+    return redirect("/appointments")

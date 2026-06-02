@@ -33,9 +33,6 @@ a {
     padding: 0 2%;
 }
 
-.block:hover, .block-top:hover, .block-bottom:hover {
-    filter: brightness(1.2);
-}
 
 .light {
     background-color: lightgray;

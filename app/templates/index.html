@@ -1,54 +1,40 @@
 {% extends 'base.html' %}
-{% block content %}
+
+{% block head %}
     <style>
-        .block:hover, .block-top:hover, .block-bottom:hover {
+        .dark:hover, .light:hover {
             background-color: var(--{{ 'doctor-light' if doctor else 'patient-light' }});
         }
-        .block, .block-top, .block-bottom {
-            border-color: var(--{{ 'doctor-dark' if doctor else 'patient-dark' }});
-        }
     </style>
+{% endblock head %}
 
-    <div style="height: 20vh;">
-    </div>
-    <div style="margin: 0 auto; width: 50vw; display:flex; flex-direction: column;">
-        <h3>Welcome back, {{ fname }}</h3>
+{% block header %}
+    <h3>Welcome back, {{ fname }}</h3>
+{% endblock header %}
+
+{% block content %}
+    <div style="50vw; display:flex; flex-direction: column;">
+
+        <a href="/logout" class="dark">
+            <p><strong>Log Out</strong></p>
+        </a>
+
+        <a href="/appointments" class="light">
+            <p><strong>Appointments:</strong> View past or upcoming appointment information or create new appointments</p>
+        </a>
+
 
         {% if doctor %}
-            <a href="/appointments-doctor" class="block-top light">
-                <p><strong>Appointments:</strong> View past or upcoming appointment information or create new appointments</p>
-            </a>
-
-            <a href="/prescriptions" class="block dark">
-                <p><strong>Prescriptions:</strong> View prescriptions you have filed or file a new prescription for a patient</p>
-            </a>
-
-            <a href="/logout" class="block-bottom light">
-                <p><strong>Log Out</strong></p>
+            <a href="/file-prescriptions" class="dark">
+                <p><strong>Prescriptions:</strong> File a new prescription for a patient </p>
             </a>
         {% else %}
-            <a href="/appointments-patient" class="block-top dark">
-                <p><strong>Appointments:</strong> View past or upcoming appointment information or create new appointments</p>
+            <a href="/prescriptions" class="dark">
+                <p><strong>Prescriptions:</strong> View your current prescriptions </p>
             </a>
-
-            <a href="/profile" class="block light">
+            <a href="/profile" class="light">
                 <p><strong>Profile:</strong> View information on your chart</p>
-            </a>
-
-            <a href="/prescriptions" class="block dark">
-                <p><strong>Prescriptions:</strong> View your current medications and dosage information</p>
-            </a>
-
-            <a href="/logout" class="block-bottom light">
-                <p><strong>Log Out</strong></p>
             </a>
         {% endif %}
     </div>
-
-    <img src="{{
-            url_for('static',filename='blue-flower-arrangement-horizontal.png')
-            if doctor else
-            url_for('static',filename='orange-flower-arrangement-horizontal.png')
-    }}" style="display:block; margin: 0 auto; width:90vw; object-fit:contain;">
-
 {% endblock content %}

@@ -3,15 +3,44 @@
 <head>
     <title>MedLoop</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}
+    {% endblock %}
+    <style>
+        .block, .block-top, .block-bottom {
+            border-color: var(--{{ 'doctor-dark' if doctor else 'patient-dark' }});
+        }
+    </style>
 </head>
 
 <body>
-    <section class="content">
-        <a href="/" style="text-decoration:none; color:black;">
-            <h1>MedLoop</h1>
-        </a>
+    <a href="/" style="text-decoration:none; color:black;">
+        <h1>MedLoop</h1>
+    </a>
 
-        {% block content %}{% endblock %}
-    </section>
+    <div style="height: 20vh;">
+    </div>
+
+    <div style="margin: 0 auto; width: 50vw; display:flex; flex-direction: column;">
+        {% block header %}{% endblock %}
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+
+        <div class="block-top">
+        </div>
+
+        <div style="padding:0px;" class="block light">
+            {% block content %}{% endblock %}
+        </div>
+
+        <div class="block-bottom">
+        </div>
+    </div>
+
+    <img src="{{
+            url_for('static',filename='blue-flower-arrangement-horizontal.png')
+            if doctor else
+            url_for('static',filename='orange-flower-arrangement-horizontal.png')
+    }}" style="display:block; margin: 0 auto; width:90vw; object-fit:contain;">
 </body>
 </html>

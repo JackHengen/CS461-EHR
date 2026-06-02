@@ -1,72 +1,70 @@
 {% extends 'base.html' %}
+
+{% block header %}
+    <h3>{{ patient.fname }} {{ patient.lname }}'s Profile</h3>
+{% endblock header %}
+
 {% block content %}
+    <div style="padding: .5em;">
+        <div>
+            <h3>Emails on File</h3>
 
-<h2>Profile</h2>
+            {% if emails %}
+                <ul>
+                    {% for email in emails %}
+                        <li>
+                            {{ email.email_addr }}
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="delete_email">
+                                <input type="hidden" name="email_addr" value="{{ email.email_addr }}">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No emails on file.</p>
+            {% endif %}
+            <form method="POST">
+                <input type="hidden" name="action" value="add_email">
 
-{% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-{% endfor %}
+                <label>Add Email:</label>
+                <input type="email" name="email_addr" required>
 
-<p><strong>Name:</strong> {{ patient.fname }} {{ patient.lname }}</p>
+                <button type="submit">Add Email</button>
+            </form>
+        </div>
 
-<h3>Emails on File</h3>
 
-{% if emails %}
-    <ul>
-        {% for email in emails %}
-            <li>
-                {{ email.email_addr }}
-                <form method="POST" style="display:inline;">
-                    <input type="hidden" name="action" value="delete_email">
-                    <input type="hidden" name="email_addr" value="{{ email.email_addr }}">
-                    <button type="submit">Delete</button>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No emails on file.</p>
-{% endif %}
+        <div style="margin-bottom:1em;">
+            <h3>Phone Numbers on File</h3>
 
-<form method="POST">
-    <input type="hidden" name="action" value="add_email">
+            {% if phones %}
+                <ul>
+                    {% for phone in phones %}
+                        <li>
+                            {{ phone.phone_num }}
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="delete_phone">
+                                <input type="hidden" name="phone_num" value="{{ phone.phone_num }}">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No phone numbers on file.</p>
+            {% endif %}
 
-    <label>Add Email:</label>
-    <input type="email" name="email_addr" required>
+            <form method="POST">
+                <input type="hidden" name="action" value="add_phone">
 
-    <button type="submit">Add Email</button>
-</form>
+                <label>Add Phone Number:</label>
+                <input type="text" name="phone_num" required>
 
-<hr>
-
-<h3>Phone Numbers on File</h3>
-
-{% if phones %}
-    <ul>
-        {% for phone in phones %}
-            <li>
-                {{ phone.phone_num }}
-                <form method="POST" style="display:inline;">
-                    <input type="hidden" name="action" value="delete_phone">
-                    <input type="hidden" name="phone_num" value="{{ phone.phone_num }}">
-                    <button type="submit">Delete</button>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No phone numbers on file.</p>
-{% endif %}
-
-<form method="POST">
-    <input type="hidden" name="action" value="add_phone">
-
-    <label>Add Phone Number:</label>
-    <input type="text" name="phone_num" required>
-
-    <button type="submit">Add Phone</button>
-</form>
-
-<p><a href="/">Back to Home</a></p>
+                <button type="submit">Add Phone</button>
+            </form>
+        </div>
+    </div>
 
 {% endblock content %}

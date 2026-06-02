@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h3>File a Prescription</h3>
+{% endblock header %}
+
+{% block content %}
+<div style="padding: .5em;">
+    <form method="POST">
+        <label for="pid">Select Patient:</label>
+        <select name="pid" id="pid" required>
+            {% for patient in patients %}
+                <option value="{{ patient.pid }}">
+                    {{ patient.fname }} {{ patient.lname }} - Patient ID: {{ patient.pid }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <label for="mid">Select Medication:</label>
+        <select name="mid" id="mid" style="width:100%; box-sizing:border-box;" required>
+            {% for med in medications %}
+                <option value="{{ med.mid }}">
+                    {{ med.name }} - {{ med.dosage }} - {{ med.description }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <button type="submit">File Prescription</button>
+    </form>
+</div>
+
+{% endblock content %}

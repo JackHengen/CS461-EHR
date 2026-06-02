@@ -1,29 +1,23 @@
-<!doctype html>
-<html>
-<head>
-    <title>Schedule Appointment</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-    <h1>Schedule Appointment</h1>
+{% block header %}
+    <h3>Schedule Appointment</h3>
+{% endblock header %}
 
-    {% for message in get_flashed_messages() %}
-        <div>{{ message }}</div>
-    {% endfor %}
+{% block content %}
+    <div style="padding:.5em">
+        <form method="post" action="/create-appointment">   
+            <label for="appointment_date">Appointment Date:</label>
+            <input type="datetime-local" id="appointment_date" name="appointment_date">
 
-    <form method="post" action="/create-appointment">   
-        <label for="appointment_date">Appointment Date:</label>
-        <input type="datetime-local" id="appointment_date" name="appointment_date">
+            <br><br>
 
-        <br><br>
+            <label for="reason">Reason:</label>
+            <input type="text" id="reason" name="reason">
 
-        <label for="reason">Reason:</label>
-        <input type="text" id="reason" name="reason">
+            <br><br>
 
-        <br><br>
-
-        <button type="submit">Create Appointment</button>
-    </form>
-
-</body>
-</html>
+            <button type="submit">Create Appointment</button>
+        </form>
+    </div>
+{% endblock content %}

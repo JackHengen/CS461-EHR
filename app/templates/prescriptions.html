@@ -1,46 +1,31 @@
 {% extends 'base.html' %}
+
+{% block header %}
+    </style>
+    <h3>Your Prescriptions:</h3>
+{% endblock header %}
+
 {% block content %}
-
-<style>
-    .block:hover, .block-top:hover, .block-bottom:hover {
-        background-color: var(--patient-light);
-    }
-    .block, .block-top, .block-bottom {
-        border-color: var(--patient-dark);
-    }
-</style>
-
-    <div style="height: 20vh;">
-    </div>
-    <div style="margin: 0 auto; width: 50vw; display:flex; flex-direction: column;">
-        <h3>Your Prescriptions:</h3>
+    <div>
 
         {% if prescriptions %}
-        <table class="block">
             <div style="display:flex; justify-content:space-evenly;">
-                <p>Medication</p>
-                <p>Dosage</p>
-                <p>Description</p>
-            </div>
-
-            <div class="block-top">
+                <strong><p style="margin-bottom:0px;">Medication</p></strong>
+                <strong><p style="margin-bottom:0px;">Dosage</p></strong>
+                <strong><p style="margin-bottom:0px;">Description</p></strong>
             </div>
 
             {% for med in prescriptions %}
-            <div class="block {{ 'dark' if loop.index % 2 == 0 else 'light' }}" style="display:flex; justify-content:space-evenly;">
-                <p>{{ med.name }}</p>
-                <p>{{ med.dosage }}</p>
-                <p>{{ med.description }}</p>
-            </div>
+                <div style="display:flex; justify-content:space-evenly;">
+                    <p>{{ med.name }}</p>
+                    <p>{{ med.dosage }}</p>
+                    <p>{{ med.description }}</p>
+                </div>
             {% endfor %}
 
-            <div class="block-bottom">
-            </div>
-        </table>
         {% else %}
         <p>No prescriptions found.</p>
         {% endif %}
 
-</div>
-
+    </div>
 {% endblock content %}

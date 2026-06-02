@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block header %}
+    <h3>Your Appointments</h3>
+    {% if not doctor %}
+    <p><a href="create-appointment">Schedule an appointment</a></p>
+    {% endif %}
+{% endblock header %}
+{% block content %}
+    <div style="padding:.5em">
+        <div>
+            {% if appointments %}
+                {% for a in appointments %}
+                    <div>
+                        <p><strong>Date & Time:</strong> {{ a.appointment_time }}</p>
+                        <p><strong>Reason:</strong> {{ a.reason }}</p>
+                        {% if doctor %}
+                            <p><strong>Patient ID:</strong> {{ a.pid }}</p>
+                        {% else %}
+                            <p><strong>Doctor ID:</strong> {{ a.did }}</p>
+                        {% endif %}
+                        <form action="{{ url_for('delete_appointment') }}" method="POST">
+                            <input type="hidden" name="pid" value="{{ a.pid }}">
+                            <input type="hidden" name="did" value="{{ a.did }}">
+                            <input type="hidden" name="appointment_time" value="{{ a.appointment_time }}">
+                            <button type="submit"
+                                    onclick="return confirm('Delete this appointment?');">
+                                Cancel Appointment
+                            </button>
+                        </form>
+                    </div>
+                    {% if not loop.last %}
+                    <hr>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>You currently have no scheduled appointments.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock content %}
